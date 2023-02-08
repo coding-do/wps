@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- 建议禁用外框浏览器自带的缩放 -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>WPS Web Office(iframe)接入指南</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      /* 防止双击缩放 */
+      touch-action: manipulation;
+    }
+
+    iframe {
+      flex: 1;
+    }
+  </style>
+  <script src="js/jwps.js"></script>
+  <script type="text/javascript">
+    // 支持 HTTPS
+    // 注意：如果通过postMessage来设置token，请在url参数加上_w_hastoken=1
+    window.onload = () => {
+
+      let wps
+      let expiresIn
+      const curFile = getParameterByName('fileid')
+      const filetype = getParameterByName('fileType')
+      const wpsConfig = async () => {
+        let res
+        if (curFile) {
+          res = await fetch(`/getUrlAndToken?fileid=${curFile}`) // getToken -> expires_in
+        } else if (['w', 's', 'p'].includes(filetype)) {
+          res = await fetch(`/getCreateFileUrlAndToken?_w_filetype=${filetype}`) // getToken -> expires_in
+        }
+        if(res.status == 200) {
+          const data = await res.json()
+
+          console.log("data==="+data.token)
+          console.log("wpsUrl==="+data.wpsUrl)
+
+          expiresIn = data.expires_in
+
+          wps = WPS.config({
+            mount: document.querySelector('body'),
+            // 文字
+            wpsUrl: data.wpsUrl
+          })
+          wps.setToken({token: data.token})
+
+
+          // 更新 token
+          setInterval(async () => {
+            const res = await fetch(`/getUrlAndToken?fileid=${curFile}`) // getToken
+            const data = await res.json()
+            wps.setToken({token: data.token})
+          }, (expiresIn - 60) * 1000)
+        } else {
+          document.body.innerHTML = res.statusText
+        }
+      }
+
+      wpsConfig()
+
+      function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+      }
+    }
+  </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
