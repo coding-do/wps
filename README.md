@@ -1,9 +1,8 @@
-## https://editzt.myones.net/open/docs/server/online-edit/callback-apides4
-
-https://our.ones.pro/wiki/#/team/RDjYMhKq/space/DCBqNWkS/page/3xpdTUR9
-
-
 # wpsweb-demo运行说明(当前版本1.0.9)
+
+「WebOffice 知识库」文档： https://wwo.wps.cn/docs/front-end/high-frequency-usage/
+「WPS开发平台」文档：https://editzt.myones.net/open#/docs/server/app-manage/api-list
+
 
 **1.设置配置文件weboffice-demo.conf**
 
